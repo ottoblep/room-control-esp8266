@@ -10,9 +10,8 @@
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
-#include "gpio.c"
 #include "udp_server.c"
-#include "delay.c"
+#include "send_codes.c"
 
 TaskHandle_t state_controller_handle = NULL;
 TaskHandle_t transmitter_handle = NULL;
