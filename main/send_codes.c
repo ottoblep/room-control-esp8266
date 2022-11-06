@@ -1,6 +1,5 @@
 #include "gpio.c"
 #include "delay.c"
-#include <math.h>
 
 
 const int delaymicro=485;
@@ -48,29 +47,3 @@ void chan1on(int n){
   delayus(11000);
   }
 }
-//void blink(int n){
-//        gpio_set_level(bluelight,1);
-//        delay(n/2);
-//        gpio_set_level(bluelight,0);
-//        delay(n/2);
-//}
-
-//void loop() {
-//   
-//   if (digitalRead(buttonpin)==0){
-//      if (sw==0){
-//        blink(200);
-//        chan1on(20);
-//        blink(200);
-//        sw=1;
-//      }
-//      else{
-//        blink(200);
-//        chan1off(20);
-//        blink(200); 
-//        blink(200);
-//        sw=0;
-//      }
-//   }
-//}
-//

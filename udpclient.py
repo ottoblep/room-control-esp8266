@@ -34,13 +34,5 @@ except socket.error as msg:
     print('Failed to create socket')
     sys.exit()
  
-while True:
-    msg = "sw" 
-    try:
-        sock.sendto(msg.encode(), (host, PORT))
-        reply, addr = sock.recvfrom(128)
-        if not reply: break
-        print('Reply[' + addr[0] + ':' + str(addr[1]) + '] - ' + str(reply))
-    except socket.error as msg:
-        print('Error Code : ' + str(msg[0]) + ' Message: ' + msg[1])
-        sys.exit()
+msg = "sw" 
+sock.sendto(msg.encode(), (host, PORT))

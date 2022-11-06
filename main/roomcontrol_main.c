@@ -1,4 +1,5 @@
 #include <string.h>
+#include <math.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -7,11 +8,13 @@
 #include "esp_netif.h"
 #include "nvs.h"
 #include "nvs_flash.h"
+#include "driver/pwm.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
 #include "udp_server.c"
 #include "send_codes.c"
+
 
 TaskHandle_t state_controller_handle = NULL;
 TaskHandle_t transmitter_handle = NULL;
@@ -59,6 +62,7 @@ static void state_controller_task(void *pvParameters)
  */
 static void transmitter_task(void *pvParameters)
 { 
+
     uint32_t note;
     while(1){
         ESP_LOGI(TAG, "Transmitter Standing By.");
@@ -81,19 +85,25 @@ static void led_dimmer_task(void *pvParameters)
 {
     uint32_t counter = 0;
     ESP_LOGI(TAG, "Dimmer Started!");
+    uint32_t duties[1] = { 500 };
+    const uint32_t pin_num[1] = { GPIO_LED_DRIVER_PIN };
+    pwm_init(1000, duties, 1, pin_num);
 
     while(1){
         if(state.room_light_on){
-            if (counter>=2000){
+            pwm_start();
+            if (counter>=1000){
               counter=0;
               ESP_LOGI(TAG, "LED Cycle!");
             } 
-//          analogWrite(bluelight,int(50-50*sin(counter/1000*PI)));
-            delayus(1000);
+            duties[0] = (int) (1000*sin(counter/1000*M_PI));
+            ESP_LOGI(TAG, "Duty Cycle %d Counter %d", duties[0], counter);
+            pwm_set_duties(duties);
+            delayus(5000);
             counter++;
         } else {
+            pwm_stop(0);
             vTaskDelay(pdMS_TO_TICKS(50));
-//          gpio_set_level(bluelight,LOW);
         }
     }
 
