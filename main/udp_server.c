@@ -1,11 +1,3 @@
-/* BSD Socket API Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <string.h>
 #include <sys/param.h>
 
@@ -22,10 +14,10 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
+#include "wifi.c"
 
 #define PORT 3333
 
-static const char *TAG = "wifi station";
 
 static void udp_server_task(void *pvParameters)
 {
@@ -44,7 +36,6 @@ static void udp_server_task(void *pvParameters)
         ip_protocol = IPPROTO_IP;
         inet_ntoa_r(destAddr.sin_addr, addr_str, sizeof(addr_str) - 1);
 
-
         int sock = socket(addr_family, SOCK_DGRAM, ip_protocol);
         if (sock < 0) {
             ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
@@ -59,9 +50,7 @@ static void udp_server_task(void *pvParameters)
         ESP_LOGI(TAG, "Socket binded");
 
         while (1) {
-
             ESP_LOGI(TAG, "Waiting for data");
-
             struct sockaddr_in sourceAddr;
             socklen_t socklen = sizeof(sourceAddr);
             int len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&sourceAddr, &socklen);
