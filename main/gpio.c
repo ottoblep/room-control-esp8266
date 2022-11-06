@@ -20,14 +20,20 @@
 #define GPIO_LED_DRIVER_PIN GPIO_OUTPUT_IO_0
 #define GPIO_DEBO433MHZ_PIN GPIO_OUTPUT_IO_1
 
+
+static TaskHandle_t control_handle = NULL;
+
 static void gpio_isr_handler(void *arg)
 {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     //uint32_t gpio_num = (uint32_t) arg;
-    //xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+    vTaskNotifyGiveFromISR( control_handle, &xHigherPriorityTaskWoken );
+    portYIELD_FROM_ISR();
 }
 
-void gpio_init(void)
+void gpio_init(TaskHandle_t state_controller_handle)
 {
+    control_handle = state_controller_handle;
     gpio_config_t io_conf; 
     io_conf.pull_down_en = 0;
     io_conf.pull_up_en = 0;
@@ -40,6 +46,7 @@ void gpio_init(void)
     io_conf.intr_type = GPIO_INTR_NEGEDGE;
     io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
     io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pull_up_en = 1;
     gpio_config(&io_conf);
 
     //install gpio isr service

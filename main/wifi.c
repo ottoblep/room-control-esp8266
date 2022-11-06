@@ -21,7 +21,7 @@
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
 
-static const char *TAG = "wifi station";
+static const char *TAG = "roomcontrol";
 
 /* The event group allows multiple bits for each event, but we only care about two events:
  * - we are connected to the AP with an IP

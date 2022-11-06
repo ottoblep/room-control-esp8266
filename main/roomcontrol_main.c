@@ -23,6 +23,7 @@ struct State {
     bool room_light_on;
 } state;
 
+
 /**
  * Main controller of the state machine receives switch requests and sends actions
  * This task must be started first to initialize shared resources
@@ -44,6 +45,9 @@ static void state_controller_task(void *pvParameters)
             if(state.room_light_on) message = 1; else message = 0;
             xTaskNotify( transmitter_handle, message, eSetValueWithOverwrite );
             state.room_light_on = !state.room_light_on; //Flip
+            // Debounce button
+            vTaskDelay(pdMS_TO_TICKS(5000));
+            xTaskNotifyStateClear(state_controller_handle); // Clear any spare notifications in the meantime
         }
     }
 }
@@ -78,8 +82,9 @@ static void led_dimmer_task(void *pvParameters)
 
     while(1){
         if(state.room_light_on){
-            if (counter>1000){
+            if (counter>=100000){
               counter=0;
+              ESP_LOGI(TAG, "LED Cycle!");
             } 
 //          analogWrite(bluelight,int(50-50*sin(counter/1000*PI)));
             vTaskDelay(pdMS_TO_TICKS(1));
@@ -95,9 +100,9 @@ static void led_dimmer_task(void *pvParameters)
 void app_main()
 {
     ESP_ERROR_CHECK(nvs_flash_init());
-    gpio_init();
     wifi_init_sta();
     xTaskCreate(state_controller_task, "state_controller", 1024, NULL, 4, &state_controller_handle);
+    gpio_init(state_controller_handle);
     xTaskCreate(transmitter_task, "transmitter", 1024, NULL, 3, &transmitter_handle);
     xTaskCreate(udp_server_task, "udp_server", 4096, (void *) &state_controller_handle, 2, &udp_server_handle);
     xTaskCreate(led_dimmer_task, "led_dimmer", 1024, NULL, 1, &led_dimmer_handle);
