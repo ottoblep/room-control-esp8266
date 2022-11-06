@@ -38,6 +38,8 @@ static void state_controller_task(void *pvParameters)
 
     while(1){
         // Wait for Note from Button or UDP to switch
+        vTaskDelay(pdMS_TO_TICKS(500));
+        xTaskNotifyStateClear(NULL);
         ESP_LOGI(TAG, "Controller Standing By.");
         if (ulTaskNotifyTake(ULONG_MAX, portMAX_DELAY)){
             ESP_LOGI(TAG, "Switch Request received.");
@@ -46,8 +48,6 @@ static void state_controller_task(void *pvParameters)
             xTaskNotify( transmitter_handle, message, eSetValueWithOverwrite );
             state.room_light_on = !state.room_light_on; //Flip
             // Debounce button
-            vTaskDelay(pdMS_TO_TICKS(5000));
-            xTaskNotifyStateClear(state_controller_handle); // Clear any spare notifications in the meantime
         }
     }
 }
@@ -87,7 +87,7 @@ static void led_dimmer_task(void *pvParameters)
               ESP_LOGI(TAG, "LED Cycle!");
             } 
 //          analogWrite(bluelight,int(50-50*sin(counter/1000*PI)));
-            vTaskDelay(pdMS_TO_TICKS(1));
+            vTaskDelay(pdMS_TO_TICKS(2));
             counter++;
         } else {
             vTaskDelay(pdMS_TO_TICKS(50));
