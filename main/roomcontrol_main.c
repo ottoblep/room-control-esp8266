@@ -11,13 +11,13 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 #include "gpio.c"
+#include "udp_server.c"
 
 TaskHandle_t state_controller_handle = NULL;
 TaskHandle_t transmitter_handle = NULL;
 TaskHandle_t led_dimmer_handle = NULL;
 TaskHandle_t udp_server_handle = NULL;
 
-#include "udp_server.c"
 
 struct State {
     bool room_light_on;
