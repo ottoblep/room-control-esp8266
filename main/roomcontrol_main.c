@@ -22,7 +22,6 @@ TaskHandle_t udp_server_handle = NULL;
 struct State {
     bool room_light_on;
 } state;
-state.room_light_on = false;
 
 /**
  * Main controller of the state machine receives switch requests and sends actions
@@ -30,6 +29,7 @@ state.room_light_on = false;
  */
 static void state_controller_task(void *pvParameters)
 {
+    state.room_light_on = false;
     // Wait for other tasks to initialize
     vTaskDelay(pdMS_TO_TICKS(400));
     // Send disable light signal to be sure its off
@@ -96,8 +96,8 @@ void app_main()
     ESP_ERROR_CHECK(nvs_flash_init());
     gpio_init();
     wifi_init_sta();
-    xTaskCreate(state_controller_task, "state_controller", 512, NULL, 4, &state_controller_handle);
-    xTaskCreate(transmitter_task, "transmitter", 512, NULL, 3, &transmitter_handle);
+    xTaskCreate(state_controller_task, "state_controller", 1024, NULL, 4, &state_controller_handle);
+    xTaskCreate(transmitter_task, "transmitter", 1024, NULL, 3, &transmitter_handle);
     xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 2, &udp_server_handle);
-    xTaskCreate(led_dimmer_task, "led_dimmer", 512, NULL, 1, &led_dimmer_handle);
+    xTaskCreate(led_dimmer_task, "led_dimmer", 1024, NULL, 1, &led_dimmer_handle);
 }
