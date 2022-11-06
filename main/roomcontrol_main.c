@@ -12,6 +12,7 @@
 #include "lwip/sys.h"
 #include "gpio.c"
 #include "udp_server.c"
+#include "delay.c"
 
 TaskHandle_t state_controller_handle = NULL;
 TaskHandle_t transmitter_handle = NULL;
@@ -87,11 +88,11 @@ static void led_dimmer_task(void *pvParameters)
               ESP_LOGI(TAG, "LED Cycle!");
             } 
 //          analogWrite(bluelight,int(50-50*sin(counter/1000*PI)));
-            vTaskDelay(pdMS_TO_TICKS(2));
+            vTaskDelay(pdMS_TO_TICKS(10));
             counter++;
         } else {
             vTaskDelay(pdMS_TO_TICKS(50));
-//          digitalWrite(bluelight,LOW);
+//          gpio_set_level(bluelight,LOW);
         }
     }
 
@@ -100,6 +101,7 @@ static void led_dimmer_task(void *pvParameters)
 void app_main()
 {
     ESP_ERROR_CHECK(nvs_flash_init());
+    initDelay();
     wifi_init_sta();
     xTaskCreate(state_controller_task, "state_controller", 1024, NULL, 4, &state_controller_handle);
     gpio_init(state_controller_handle);
