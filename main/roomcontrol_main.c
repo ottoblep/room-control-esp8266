@@ -36,18 +36,18 @@ static void state_controller_task(void *pvParameters)
     // Send disable light signal to be sure its off
     xTaskNotify( transmitter_handle, 1, eSetValueWithOverwrite );
 
+    uint32_t message;
+
     while(1){
         // Wait for Note from Button or UDP to switch
-        vTaskDelay(pdMS_TO_TICKS(500));
-        xTaskNotifyStateClear(NULL);
+        vTaskDelay(pdMS_TO_TICKS(2000)); // debounce
         ESP_LOGI(TAG, "Controller Standing By.");
-        if (ulTaskNotifyTake(ULONG_MAX, portMAX_DELAY)){
+        xTaskNotifyStateClear(NULL);
+        if (xTaskNotifyWait( ULONG_MAX, ULONG_MAX, &message, portMAX_DELAY )){
             ESP_LOGI(TAG, "Switch Request received.");
-            uint32_t message;
             if(state.room_light_on) message = 1; else message = 0;
             xTaskNotify( transmitter_handle, message, eSetValueWithOverwrite );
             state.room_light_on = !state.room_light_on; //Flip
-            // Debounce button
         }
     }
 }
@@ -65,8 +65,10 @@ static void transmitter_task(void *pvParameters)
         if (xTaskNotifyWait( ULONG_MAX, 0, &note, portMAX_DELAY )){
             if (note == 0){ // If light is off switch it on 
                 ESP_LOGI(TAG, "Sending Light on Signal!");
+                chan1on(20);
             } else { // If light is on switch it off
                 ESP_LOGI(TAG, "Sending Light off Signal!");
+                chan1off(20);
             }
         }
     }
@@ -82,12 +84,12 @@ static void led_dimmer_task(void *pvParameters)
 
     while(1){
         if(state.room_light_on){
-            if (counter>=100000){
+            if (counter>=2000){
               counter=0;
               ESP_LOGI(TAG, "LED Cycle!");
             } 
 //          analogWrite(bluelight,int(50-50*sin(counter/1000*PI)));
-            vTaskDelay(pdMS_TO_TICKS(10));
+            delayus(1000);
             counter++;
         } else {
             vTaskDelay(pdMS_TO_TICKS(50));
