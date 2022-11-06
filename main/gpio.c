@@ -17,6 +17,9 @@
 #define GPIO_INPUT_IO_0     4
 #define GPIO_INPUT_PIN_SEL  (1ULL<<GPIO_INPUT_IO_0)
 
+#define GPIO_LED_DRIVER_PIN GPIO_OUTPUT_IO_0
+#define GPIO_DEBO433MHZ_PIN GPIO_OUTPUT_IO_1
+
 static void gpio_isr_handler(void *arg)
 {
     uint32_t gpio_num = (uint32_t) arg;

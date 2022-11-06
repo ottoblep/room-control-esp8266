@@ -75,6 +75,7 @@ static void udp_server_task(void *pvParameters)
                     break;
                 }
             }
+            vTaskDelay(pdMS_TO_TICKS(30));
         }
 
         if (sock != -1) {
