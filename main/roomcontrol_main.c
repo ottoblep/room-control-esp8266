@@ -10,14 +10,14 @@
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
-
-#include "udp_server.c"
 #include "gpio.c"
 
 TaskHandle_t state_controller_handle = NULL;
 TaskHandle_t transmitter_handle = NULL;
 TaskHandle_t led_dimmer_handle = NULL;
 TaskHandle_t udp_server_handle = NULL;
+
+#include "udp_server.c"
 
 struct State {
     bool room_light_on;
@@ -62,7 +62,7 @@ static void transmitter_task(void *pvParameters)
             if (note == 0){ // If light is off switch it on 
                 ESP_LOGI(TAG, "Sending Light on Signal!");
             } else { // If light is on switch it off
-                ESP_LOGI(TAG, "Sendiang Light off Signal!");
+                ESP_LOGI(TAG, "Sending Light off Signal!");
             }
         }
     }
@@ -74,15 +74,16 @@ static void transmitter_task(void *pvParameters)
 static void led_dimmer_task(void *pvParameters)
 {
     uint32_t counter = 0;
+    ESP_LOGI(TAG, "Dimmer Started!");
+
     while(1){
         if(state.room_light_on){
             if (counter>1000){
               counter=0;
-              ESP_LOGI(TAG, "LED Cycle!");
             } 
 //          analogWrite(bluelight,int(50-50*sin(counter/1000*PI)));
-            counter++;
             vTaskDelay(pdMS_TO_TICKS(1));
+            counter++;
         } else {
             vTaskDelay(pdMS_TO_TICKS(50));
 //          digitalWrite(bluelight,LOW);
@@ -98,6 +99,6 @@ void app_main()
     wifi_init_sta();
     xTaskCreate(state_controller_task, "state_controller", 1024, NULL, 4, &state_controller_handle);
     xTaskCreate(transmitter_task, "transmitter", 1024, NULL, 3, &transmitter_handle);
-    xTaskCreate(udp_server_task, "udp_server", 4096, NULL, 2, &udp_server_handle);
+    xTaskCreate(udp_server_task, "udp_server", 4096, (void *) &state_controller_handle, 2, &udp_server_handle);
     xTaskCreate(led_dimmer_task, "led_dimmer", 1024, NULL, 1, &led_dimmer_handle);
 }

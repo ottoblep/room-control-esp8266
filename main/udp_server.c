@@ -18,9 +18,9 @@
 
 #define PORT 3333
 
-
 static void udp_server_task(void *pvParameters)
 {
+    
     char rx_buffer[128];
     char addr_str[128];
     int addr_family;
@@ -63,19 +63,24 @@ static void udp_server_task(void *pvParameters)
             // Data received
             else {
                 // Get the sender's ip address as string
-                inet_ntoa_r(((struct sockaddr_in *)&sourceAddr)->sin_addr.s_addr, addr_str, sizeof(addr_str) - 1);
+                //inet_ntoa_r(((struct sockaddr_in *)&sourceAddr)->sin_addr.s_addr, addr_str, sizeof(addr_str) - 1);
 
-                rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string...
+                rx_buffer[len-1] = 0; // Null-terminate whatever we received and treat like a string...
                 ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
                 ESP_LOGI(TAG, "%s", rx_buffer);
 
-                int err = sendto(sock, rx_buffer, len, 0, (struct sockaddr *)&sourceAddr, sizeof(sourceAddr));
-                if (err < 0) {
-                    ESP_LOGE(TAG, "Error occured during sending: errno %d", errno);
-                    break;
+                if(strcmp(rx_buffer,"sw")){
+                    ESP_LOGI(TAG, "UDP Command received");
+                    xTaskNotifyGive(*((TaskHandle_t *) pvParameters));
                 }
+
+                //int err = sendto(sock, rx_buffer, len, 0, (struct sockaddr *)&sourceAddr, sizeof(sourceAddr));
+                //if (err < 0) {
+                //    ESP_LOGE(TAG, "Error occured during sending: errno %d", errno);
+                //    break;
+                //}
             }
-            vTaskDelay(pdMS_TO_TICKS(30));
+            vTaskDelay(pdMS_TO_TICKS(50));
         }
 
         if (sock != -1) {
